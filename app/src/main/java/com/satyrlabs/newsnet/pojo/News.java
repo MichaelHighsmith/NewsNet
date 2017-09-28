@@ -2,10 +2,6 @@ package com.satyrlabs.newsnet.pojo;
 
 import com.google.gson.annotations.SerializedName;
 
-/**
- * Created by mhigh on 9/27/2017.
- */
-
 public class News {
     @SerializedName("author")
     private String author;

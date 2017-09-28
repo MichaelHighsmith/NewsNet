@@ -13,9 +13,6 @@ import com.satyrlabs.newsnet.pojo.News;
 
 import java.util.List;
 
-/**
- * Created by mhigh on 9/27/2017.
- */
 
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder> {
 
