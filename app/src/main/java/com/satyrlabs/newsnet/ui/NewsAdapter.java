@@ -70,7 +70,12 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
     public void onBindViewHolder(NewsViewHolder holder, final int position){
         //set textviews with data from response
         holder.articleTitle.setText(news.get(position).getTitle());
-        holder.articleDescription.setText(news.get(position).getDescription());
+        String description = news.get(position).getDescription();
+        //limit description length to 100 char while avoiding ArrayOutOfBoundsException)
+        if(description!= null){
+            description = description.substring(0, Math.min(description.length(), 100)) + "...";
+        }
+        holder.articleDescription.setText(description);
         //Use Picasso and the image url to load image on the news feed
         Picasso.with(context).load(news.get(position).getUrlToImage()).into(holder.articleImage);
 

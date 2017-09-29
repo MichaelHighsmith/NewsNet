@@ -63,7 +63,7 @@ public class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.SourceView
         final String id = sources.get(position).getId();
         holder.sourceName.setText(name);
         //Set the onclickListener for each news source
-        holder.sourceName.setOnClickListener(new View.OnClickListener(){
+        holder.sourcesLayout.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
                 if(callback!=null){

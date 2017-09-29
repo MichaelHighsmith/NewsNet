@@ -8,34 +8,19 @@
     tools:context="com.satyrlabs.newsnet.ui.MainActivity"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
         <android.support.v7.widget.RecyclerView
             android:id="@+id/source_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:layout_editor_absoluteY="8dp"
-            tools:layout_editor_absoluteX="8dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@color/lightPurple"
             />
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="6">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/news_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        tools:layout_editor_absoluteY="8dp"
-        tools:layout_editor_absoluteX="8dp"
+        android:layout_height="0dp"
+        android:layout_weight="7"
         />
-
-    </LinearLayout>
 
 </LinearLayout>

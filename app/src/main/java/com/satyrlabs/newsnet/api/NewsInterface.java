@@ -12,8 +12,17 @@ public interface NewsInterface {
     @GET("articles")
     Call<NewsResponse> getLatestNews(
             @Query("source") String source,
+            @Query("sortBy") String sortBy,
             @Query("apiKey") String apiKey
     );
+
+    //called when no sort available
+    @GET("articles")
+    Call<NewsResponse> getLatestNewsNoSort(
+        @Query("source") String source,
+        @Query("apiKey") String apiKey
+    );
+
 
     @GET("sources")
     Call<SourcesResponse> getNewsSources(
