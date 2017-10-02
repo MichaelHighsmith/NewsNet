@@ -24,10 +24,16 @@ public class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.SourceView
     private Context context;
 
     AdapterCallback callback;
+    AdapterLongCallback longCallback;
 
     //interface that is implemented by MainActivity to reference recyclerview clicks
     public interface AdapterCallback{
         void onItemClicked(String id);
+    }
+
+    //interface for longclicklistener
+    public interface AdapterLongCallback{
+        void onItemLongClicked(String id);
     }
 
 
@@ -43,11 +49,13 @@ public class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.SourceView
         }
     }
 
-    public SourceAdapter(List<Sources> sources, int rowLayout, Context context, AdapterCallback callback){
+    public SourceAdapter(List<Sources> sources, int rowLayout, Context context,
+                         AdapterCallback callback, AdapterLongCallback longCallback){
         this.sources = sources;
         this.rowLayout = rowLayout;
         this.context = context;
         this.callback = callback;
+        this.longCallback = longCallback;
     }
 
     @Override
@@ -68,9 +76,16 @@ public class SourceAdapter extends RecyclerView.Adapter<SourceAdapter.SourceView
             public void onClick(View v){
                 if(callback!=null){
                     callback.onItemClicked(id);
-                }else{
-                    Log.v("callback is null", "callback is null");
                 }
+            }
+        });
+        holder.sourcesLayout.setOnLongClickListener(new View.OnLongClickListener(){
+            @Override
+            public boolean onLongClick(View v){
+                if(longCallback!=null){
+                    longCallback.onItemLongClicked(id);
+                }
+                return true;
             }
         });
     }

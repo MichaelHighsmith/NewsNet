@@ -2,25 +2,57 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.satyrlabs.newsnet.ui.MainActivity"
     android:orientation="vertical">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/source_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@color/lightPurple"
-            />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/source_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:background="@color/lightPurple"
+        />
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/custom_source_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:background="@color/lightPurple"
+        />
+
+    <TextView
+        android:id="@+id/empty_recycler_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Click and hold a news source to favorite it!"
+        android:gravity="center"
+        android:background="@color/lightPurple"
+        android:visibility="gone"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:textSize="16dp"/>
+
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/news_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="7"
+        android:layout_weight="24"
         />
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/add_id">
+    </com.google.android.gms.ads.AdView>
 
 </LinearLayout>

@@ -86,8 +86,6 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
             public void onClick(View v){
                 if(callback!=null){
                     callback.onArticleClicked(url);
-                }else{
-                    Log.v("error in calling url", url);
                 }
             }
         });

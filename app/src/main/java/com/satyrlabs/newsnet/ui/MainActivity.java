@@ -16,10 +16,16 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.activeandroid.query.Select;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.satyrlabs.newsnet.R;
 import com.satyrlabs.newsnet.api.ApiClient;
 import com.satyrlabs.newsnet.api.NewsInterface;
@@ -28,13 +34,14 @@ import com.satyrlabs.newsnet.pojo.NewsResponse;
 import com.satyrlabs.newsnet.pojo.Sources;
 import com.satyrlabs.newsnet.pojo.SourcesResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements SourceAdapter.AdapterCallback, NewsAdapter.ArticleCallback{
+public class MainActivity extends AppCompatActivity implements SourceAdapter.AdapterCallback, SourceAdapter.AdapterLongCallback, NewsAdapter.ArticleCallback, CustomAdapter.CustomCallback{
 
     //powered by "NewsAPI.org"
 
@@ -46,11 +53,23 @@ public class MainActivity extends AppCompatActivity implements SourceAdapter.Ada
     NewsInterface apiService;
     SourceAdapter sourceAdapter;
 
+    RecyclerView customSourceRecyclerView;
+    CustomAdapter customSourceAdapter;
+    ArrayList<String> customList;
+
+    TextView emptyRecycler;
+
+    private AdView mAdView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         //instantiate the recyclerviews
         recyclerView = (RecyclerView) findViewById(R.id.news_recycler_view);
@@ -61,11 +80,14 @@ public class MainActivity extends AppCompatActivity implements SourceAdapter.Ada
         sourceRecyclerView = (RecyclerView) findViewById(R.id.source_recycler_view);
         sourceRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
+        customSourceRecyclerView = (RecyclerView) findViewById(R.id.custom_source_recycler_view);
+        customSourceRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        emptyRecycler = (TextView) findViewById(R.id.empty_recycler_text);
 
         //create an instance of the interface that points to retrofit object instance
         apiService = ApiClient.getClient().create(NewsInterface.class);
 
-        //call the ApiClient to get initial responses for both recyclerviews
+        //call the ApiClient to get initial responses for all recyclerviews
         initialCall();
 
     }
@@ -79,24 +101,41 @@ public class MainActivity extends AppCompatActivity implements SourceAdapter.Ada
                 int statusCode = response.code();
                 if(response.body() != null){
                     List<Sources> sources = response.body().getSources();
-                    sourceAdapter = new SourceAdapter(sources, R.layout.list_item_sources, getApplicationContext(), MainActivity.this);
+                    sourceAdapter = new SourceAdapter(sources, R.layout.list_item_sources, getApplicationContext(), MainActivity.this, MainActivity.this);
                     sourceRecyclerView.setAdapter(sourceAdapter);
-                } else {
-                    Log.v(response.toString(), "is null");
                 }
-                Log.v(Integer.toString(statusCode), "is the status code");
             }
 
             @Override
             public void onFailure(Call<SourcesResponse> call, Throwable t) {
-                Log.e(TAG, t.toString());
             }
         });
+
+        customList = new ArrayList<>();
+
+        List<CustomSource> customSources = getAll();
+        for(int i = 0; i<customSources.size(); i++){
+            CustomSource customSource = customSources.get(i);
+            customList.add(customSource.name);
+        }
+
+        customSourceAdapter = new CustomAdapter(this, customList, MainActivity.this);
+        if(customList.isEmpty()){
+            emptyRecycler.setVisibility(View.VISIBLE);
+            customSourceRecyclerView.setVisibility(View.GONE);
+        } else{
+            emptyRecycler.setVisibility(View.GONE);
+            customSourceRecyclerView.setVisibility(View.VISIBLE);
+        }
+        customSourceRecyclerView.setAdapter(customSourceAdapter);
+
+
 
         //Check for what the most recent source was and then open it first
         SharedPreferences sharedPreferences = getSharedPreferences("myPref", 0);
         String currentSource = sharedPreferences.getString("source", "techcrunch");
         String currentSortBy = sharedPreferences.getString("sortBy", "top");
+
         callNewsFeed(currentSource, currentSortBy);
     }
 
@@ -115,44 +154,35 @@ public class MainActivity extends AppCompatActivity implements SourceAdapter.Ada
                     List<News> news = response.body().getArticles();
                     recyclerView.setAdapter(new NewsAdapter(news, R.layout.list_item_news, getApplicationContext(), MainActivity.this));
                 } else {
-                    Log.v(response.toString(), "is null");
                     //If the sort type isn't available for this call, call again with the default sort(top);
                     callDefaultSort(source);
                 }
-                Log.v(Integer.toString(statusCode), "is the status code");
             }
 
             @Override
             public void onFailure(Call<NewsResponse> call, Throwable t) {
-                Log.e(TAG, t.toString());
             }
         });
     }
 
     //This is called if the previous response code was not 200 due to a sortBy category not being available for that source.  the default sort is called instead
     public void callDefaultSort(String source){
-        Log.v("default sort called", "default");
         //Call the getLatestNews method from interface and save the returned value as a call
         Call<NewsResponse> call = apiService.getLatestNewsNoSort(source, API_KEY);
         //enqueue the call (asynchronous)
         call.enqueue(new Callback<NewsResponse>() {
             @Override
             public void onResponse(Call<NewsResponse> call, Response<NewsResponse> response) {
-                int statusCode = response.code();
                 //Check that the response is not null
                 if(response.body() != null){
                     //get the list of articles (each one matches the POJO 'News')
                     List<News> news = response.body().getArticles();
                     recyclerView.setAdapter(new NewsAdapter(news, R.layout.list_item_news, getApplicationContext(), MainActivity.this));
-                } else {
-                    Log.v(response.toString(), "is null");
                 }
-                Log.v(Integer.toString(statusCode), "is the status code");
             }
 
             @Override
             public void onFailure(Call<NewsResponse> call, Throwable t) {
-                Log.e(TAG, t.toString());
             }
         });
     }
@@ -190,7 +220,6 @@ public class MainActivity extends AppCompatActivity implements SourceAdapter.Ada
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
             case R.id.sort_by:
-                Log.v("sort by", "selected");
                 changeSortOrder(item);
                 return true;
         }
@@ -215,4 +244,42 @@ public class MainActivity extends AppCompatActivity implements SourceAdapter.Ada
         onItemClicked(currentSource);
     }
 
+    public List<CustomSource> getAll(){
+        return new Select()
+                .from(CustomSource.class)
+                .orderBy("Name ASC")
+                .execute();
+    }
+
+    @Override
+    public void onCustomSourceClicked(String id) {
+        //update the sharedpref
+        SharedPreferences sharedPreferences = getSharedPreferences("myPref", 0);
+        String sortBy = sharedPreferences.getString("sortBy", "top");
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("source", id);
+        editor.apply();
+
+        //load the new sources articles
+        callNewsFeed(id, sortBy);
+    }
+
+    @Override
+    public void onItemLongClicked(String id) {
+        //Save custom sources
+        CustomSource customSource = new CustomSource();
+        customSource.name = id;
+        //Check that the source isn't already in the custom list, if not then add it and save to database
+        if (customList.contains(id)){
+            Toast.makeText(this, "Already added", Toast.LENGTH_SHORT).show();
+        } else{
+            Toast.makeText(this, "Source Added To Favorites", Toast.LENGTH_SHORT).show();
+            customSource.save();
+            customList.add(id);
+            emptyRecycler.setVisibility(View.GONE);
+            customSourceRecyclerView.setVisibility(View.VISIBLE);
+            customSourceAdapter.notifyDataSetChanged();
+        }
+
+    }
 }
